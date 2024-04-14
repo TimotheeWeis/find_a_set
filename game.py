@@ -2,7 +2,7 @@ import random
 
 import pygame
 
-from game_classes import Card
+from game_classes import Card, GameBoard
 
 pygame.init()
 
@@ -14,7 +14,9 @@ mouse_pressed = False
 # Set up the drawing window
 screen = pygame.display.set_mode([SCREEN_SIZE_X, SCREEN_SIZE_Y])
 
-first_card = Card(0, 0, 1, 0)
+game_board = GameBoard()
+game_board.generate_board()
+first_card = Card(1, 0, 3, 2)
 
 # Run until the user asks to quit
 running = True
@@ -29,9 +31,8 @@ while running:
 
     # Fill the background with white
     screen.fill((255, 255, 255))
+    game_board.draw(screen)
 
-    if mouse_buttons[0] and not mouse_pressed:
-        first_card.draw(screen, 100, 100)
     # Flip the display
     pygame.display.flip()
 
