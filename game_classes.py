@@ -181,12 +181,10 @@ class GameBoard:
             return True
         return False
     
-    def draw(self, screen, cursor_pos, is_clicked):
+    def draw(self, screen, cursor_pos):
 
         self.draw_solution_button(screen, cursor_pos)
     
-        if is_clicked:
-            self.process_click(cursor_pos, screen)
 
         for i in range(len(self.cards)):
             x = self.base_x + (i%3)*self.x_space
@@ -232,7 +230,10 @@ class GameBoard:
             self.selected = []
 
 
-    def update(self):
+    def update(self, cursor_pos, screen, is_clicked):
+        if is_clicked:
+            self.process_click(cursor_pos, screen)
+
         if len(self.selected) == 3:
             first_card = self.cards[self.selected[0]]
             second_card = self.cards[self.selected[1]]
