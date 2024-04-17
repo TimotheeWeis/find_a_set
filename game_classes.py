@@ -184,8 +184,6 @@ class GameBoard:
     def draw(self, screen, cursor_pos):
 
         self.draw_solution_button(screen, cursor_pos)
-    
-
         for i in range(len(self.cards)):
             x = self.base_x + (i%3)*self.x_space
             y = self.base_y + (i//3)*self.y_space
@@ -230,7 +228,7 @@ class GameBoard:
             self.selected = []
 
 
-    def update(self, cursor_pos, screen, is_clicked):
+    def update(self, cursor_pos, screen, is_clicked, stats_tracker):
         if is_clicked:
             self.process_click(cursor_pos, screen)
 
@@ -239,6 +237,7 @@ class GameBoard:
             second_card = self.cards[self.selected[1]]
             third_card = self.cards[self.selected[2]]
             if self.check_if_solution(first_card, second_card, third_card):
+                print(stats_tracker.find_category(first_card, second_card, third_card))
                 self.selected = sorted(self.selected, reverse=True)
                 for i in self.selected:
                     self.cards.pop(i)

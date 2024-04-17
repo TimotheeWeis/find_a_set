@@ -3,6 +3,7 @@ import random
 import pygame
 
 from game_state import GameState
+from stats_tracker import StatsTracker
 
 pygame.init()
 
@@ -23,6 +24,7 @@ running = True
 
 
 clock = pygame.time.Clock()
+stats_tracker = StatsTracker()
 
 while running:
 
@@ -34,7 +36,7 @@ while running:
 
     # Fill the background with white
     screen.fill((100, 100, 100))
-    prev_mouse_state = game_state.update(screen)
+    prev_mouse_state = game_state.update(screen, stats_tracker)
     game_state.draw(screen)
 
 
