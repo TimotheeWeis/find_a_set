@@ -6,7 +6,7 @@ class StatsTracker:
         self.categories = ["same_same_same_same", "same_same_same_different", "same_same_different_same", "same_same_different_different",
                       "same_different_same_same", "same_different_same_different", "same_different_different_same", "same_different_different_different",
                       "different_same_same_same", "different_same_same_different", "different_same_different_same", "different_same_different_different",
-                      "different_different_same_same", "different_different,same_different", "different_different_different_same", "different_different_different_different"]
+                      "different_different_same_same", "different_different_same_different", "different_different_different_same", "different_different_different_different"]
         
         for category in self.categories:
             self.load_stats(category)
@@ -23,9 +23,17 @@ class StatsTracker:
         except KeyError:
             print(f"{category} is not a valid stat")
     
+    def reset_raw_stats(self):
+        for category in self.categories:
+            self.reset_stats(category)
+    
     def save_stats(self, category):
         with open("stats/raw_stats/" + category + ".json", "w") as file:
             json.dump(self.stats[category], file)
+
+    def register_stat_on_completion(self, category, time):
+        self.stats[category]["total_sets_found"] += 1
+        self.stats[category]["time_list"].append(time)
     
     def save_raw_stats(self):
         for category in self.categories:

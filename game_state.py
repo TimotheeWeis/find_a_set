@@ -3,9 +3,9 @@ import pygame
 from game_classes import GameBoard
 
 class GameState:
-    def __init__(self):
+    def __init__(self, width, height):
         self.pause = False
-        self.game_board = GameBoard()
+        self.game_board = GameBoard(width, height)
         self.game_board.fill_board()
         self.prev_mouse_state = False
 

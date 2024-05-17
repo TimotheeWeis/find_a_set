@@ -1,6 +1,7 @@
 import pygame
 import random
 import math
+import time
 
 class Card:
     def __init__(self, color, shape, number, shading, width=200, height=100):
@@ -140,24 +141,37 @@ class Card:
             self.draw_circle(screen, x + self.width/3, y)
 
 class GameBoard:
-    def __init__(self):
+    def __init__(self, width, height):
         self.cards = []
         self.selected = []
 
+        self.width = width
+        self.height = height
+        self.card_width = width/4
+        self.card_height = height/10
+        
         self.base_x = 50
         self.base_y = 50
-        self.x_space = 220
-        self.y_space = 150
+        self.x_space = self.card_width + 20
+        self.y_space = self.card_height + 20
         self.show_solution = False
         self.solution = []
 
         self.sol_button_x_offset = 50
         self.sol_button_y_offset = 50
-        self.sol_button_x = 200
-        self.sol_button_y = 100
+        self.sol_button_x = self.card_width
+        self.sol_button_y = self.card_height
+        self.stats_button_x_offset = 50
+        self.stats_button_y_offset = 50
+        self.stats_button_x = self.card_width
+        self.stats_button_y = self.card_height
+
+        self.time = time.time()
+
+        self.stats_mode = False
 
         self.hint_image = pygame.transform.scale(pygame.image.load("images/hint.png"), (self.sol_button_y, self.sol_button_y))
-
+        self.stats_mode_image = pygame.transform.scale(pygame.image.load("images/S.png"), (self.sol_button_y, self.sol_button_y))
 
     def check_if_global_solution(self):
         for i in range(len(self.cards)):
@@ -184,6 +198,7 @@ class GameBoard:
     def draw(self, screen, cursor_pos):
 
         self.draw_solution_button(screen, cursor_pos)
+        self.draw_stats_mode_button(screen, cursor_pos)
         for i in range(len(self.cards)):
             x = self.base_x + (i%3)*self.x_space
             y = self.base_y + (i//3)*self.y_space
@@ -202,6 +217,18 @@ class GameBoard:
         
         screen.blit(self.hint_image, (self.sol_button_x_offset + (self.sol_button_x - self.sol_button_y)//2, screen_height - self.sol_button_y_offset - self.sol_button_y))
 
+    def draw_stats_mode_button(self, screen, cursor_pos):
+        screen_width, screen_height = screen.get_size()
+        cursor_x, cursor_y = cursor_pos
+        pygame.draw.rect(screen, (200, 200, 200), (screen_width - self.stats_button_x_offset - self.stats_button_x, screen_height - self.stats_button_y_offset - self.stats_button_y, self.stats_button_x, self.stats_button_y))
+        if (cursor_x >= screen_width - self.stats_button_x_offset - self.stats_button_x and
+            cursor_x <= screen_width - self.stats_button_x_offset and
+            cursor_y >= screen_height - self.stats_button_y_offset - self.stats_button_y and
+            cursor_y <= screen_height - self.stats_button_y_offset):
+
+            pygame.draw.rect(screen, (255, 255, 0), (screen_width - self.stats_button_x_offset - self.stats_button_x, screen_height - self.stats_button_y_offset - self.stats_button_y, self.stats_button_x, self.stats_button_y), 2)
+        
+        screen.blit(self.stats_mode_image, (screen_width - self.stats_button_x_offset - self.stats_button_x + (self.stats_button_x - self.stats_button_y)//2, screen_height - self.stats_button_y_offset - self.stats_button_y))
 
 
     def process_click(self, cursor_pos, screen):
@@ -222,10 +249,17 @@ class GameBoard:
         if (cursor_x >= self.sol_button_x_offset and
             cursor_x <= self.sol_button_x_offset + self.sol_button_x and
             cursor_y >= screen_height - self.sol_button_y_offset - self.sol_button_y and
-            cursor_y <=screen_height - self.sol_button_y_offset):
+            cursor_y <= screen_height - self.sol_button_y_offset):
 
             self.show_solution = True
             self.selected = []
+
+        if (cursor_x >= screen_width - self.stats_button_x_offset - self.stats_button_x and
+            cursor_x <= screen_width - self.stats_button_x_offset and
+            cursor_y >= screen_height - self.stats_button_y_offset - self.stats_button_y and
+            cursor_y <= screen_height - self.stats_button_y_offset):
+
+            self.stats_mode = not self.stats_mode
 
 
     def update(self, cursor_pos, screen, is_clicked, stats_tracker):
@@ -237,7 +271,10 @@ class GameBoard:
             second_card = self.cards[self.selected[1]]
             third_card = self.cards[self.selected[2]]
             if self.check_if_solution(first_card, second_card, third_card):
-                print(stats_tracker.find_category(first_card, second_card, third_card))
+                category = stats_tracker.find_category(first_card, second_card, third_card)
+                if self.stats_mode:
+                    stats_tracker.register_stat_on_completion(category, time.time() - self.time)
+                self.time = time.time()
                 self.selected = sorted(self.selected, reverse=True)
                 for i in self.selected:
                     self.cards.pop(i)
@@ -253,7 +290,7 @@ class GameBoard:
         while not self.check_if_global_solution():
             for _ in range(3):
                 self.add_card()
-        
+
 
     def add_card(self):
         color = random.randint(0, 2)
@@ -268,7 +305,7 @@ class GameBoard:
             shape = random.randint(0, 2)
             number = random.randint(0, 2)
             shading = random.randint(0, 2)
-            new_card = Card(color, shape, number, shading)
+            new_card = Card(color, shape, number, shading, self.card_width, self.card_height)
             if not any(new_card.is_equal(card) for card in self.cards) or len(self.cards) == 0:
                 self.cards.append(new_card)
                 sentinelle = False
