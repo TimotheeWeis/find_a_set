@@ -31,7 +31,6 @@ running = True
 
 clock = pygame.time.Clock()
 stats_tracker = StatsTracker()
-stats_tracker.reset_raw_stats()
 
 while running:
 
