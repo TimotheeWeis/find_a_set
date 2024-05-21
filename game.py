@@ -51,5 +51,6 @@ while running:
 
 # Done! Time to quit.
 
+stats_tracker.save_raw_stats()
 
 pygame.quit()

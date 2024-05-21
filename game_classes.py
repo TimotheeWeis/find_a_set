@@ -220,7 +220,11 @@ class GameBoard:
     def draw_stats_mode_button(self, screen, cursor_pos):
         screen_width, screen_height = screen.get_size()
         cursor_x, cursor_y = cursor_pos
+        
+
         pygame.draw.rect(screen, (200, 200, 200), (screen_width - self.stats_button_x_offset - self.stats_button_x, screen_height - self.stats_button_y_offset - self.stats_button_y, self.stats_button_x, self.stats_button_y))
+        if self.stats_mode:
+            pygame.draw.rect(screen, (0, 255, 0), (screen_width - self.stats_button_x_offset - self.stats_button_x, screen_height - self.stats_button_y_offset - self.stats_button_y, self.stats_button_x, self.stats_button_y), 2)
         if (cursor_x >= screen_width - self.stats_button_x_offset - self.stats_button_x and
             cursor_x <= screen_width - self.stats_button_x_offset and
             cursor_y >= screen_height - self.stats_button_y_offset - self.stats_button_y and
@@ -231,7 +235,7 @@ class GameBoard:
         screen.blit(self.stats_mode_image, (screen_width - self.stats_button_x_offset - self.stats_button_x + (self.stats_button_x - self.stats_button_y)//2, screen_height - self.stats_button_y_offset - self.stats_button_y))
 
 
-    def process_click(self, cursor_pos, screen):
+    def process_click(self, cursor_pos, screen, stats_tracker):
         for i in range(len(self.cards)):
             x = self.base_x + (i%3)*self.x_space
             y = self.base_y + (i//3)*self.y_space
@@ -252,6 +256,8 @@ class GameBoard:
             cursor_y <= screen_height - self.sol_button_y_offset):
 
             self.show_solution = True
+            if self.stats_mode:
+                stats_tracker.add_hint([self.cards[self.solution[i]] for i in range(3)])
             self.selected = []
 
         if (cursor_x >= screen_width - self.stats_button_x_offset - self.stats_button_x and
@@ -264,7 +270,7 @@ class GameBoard:
 
     def update(self, cursor_pos, screen, is_clicked, stats_tracker):
         if is_clicked:
-            self.process_click(cursor_pos, screen)
+            self.process_click(cursor_pos, screen, stats_tracker)
 
         if len(self.selected) == 3:
             first_card = self.cards[self.selected[0]]
