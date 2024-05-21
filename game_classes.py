@@ -141,7 +141,7 @@ class Card:
             self.draw_circle(screen, x + self.width/3, y)
 
 class GameBoard:
-    def __init__(self, width, height):
+    def __init__(self, width, height, is_train=False, category_to_train=None):
         self.cards = []
         self.selected = []
 
@@ -165,6 +165,9 @@ class GameBoard:
         self.stats_button_y_offset = 50
         self.stats_button_x = self.card_width
         self.stats_button_y = self.card_height
+
+        self.is_train = is_train
+        self.category_to_train = category_to_train
 
         self.time = time.time()
 
@@ -286,17 +289,61 @@ class GameBoard:
                     self.cards.pop(i)
                 self.show_solution = False
                 self.selected = []
-
-        self.fill_board()
+        if not self.is_train or len(self.cards) < 12:
+            self.fill_board()
 
     def fill_board(self):
-        while(len(self.cards) < 12):
-            self.add_card()
-        
-        while not self.check_if_global_solution():
-            for _ in range(3):
-                self.add_card()
+        """
+        Fill the boar with cards from scratch
+        """
 
+        if not self.is_train:
+            while(len(self.cards) < 12):
+                self.add_card()
+            
+            while not self.check_if_global_solution():
+                for _ in range(3):
+                    self.add_card()
+
+        if self.is_train:
+            self.cards = self.generate_set(self.category_to_train)
+            while(len(self.cards) < 12):
+                self.add_card()
+            indices = random.sample(range(12), 3)
+            self.cards[0], self.cards[indices[0]] = self.cards[indices[0]], self.cards[0]
+            self.cards[1], self.cards[indices[1]] = self.cards[indices[1]], self.cards[1]
+            self.cards[2], self.cards[indices[2]] = self.cards[indices[2]], self.cards[2]
+
+    
+    def generate_set(self, category):
+        """
+        Generate a set that matches the category
+        """
+        parsed_category = category.split("_")
+        first_card_attributes = []
+        second_card_attributes = []
+        third_card_attributes = []
+        for x in parsed_category:
+            if x == "same":
+                attribute = random.randint(0,2)
+                first_card_attributes.append(attribute)
+                second_card_attributes.append(attribute)
+                third_card_attributes.append(attribute)
+            
+            else:
+                first_card_attribute = random.randint(0,2)
+                second_card_attribute = random.choice([i for i in range(3) if i != first_card_attribute])
+                third_card_attribute = [i for i in range(3) if i not in [first_card_attribute, second_card_attribute]][0]
+
+                first_card_attributes.append(first_card_attribute)
+                second_card_attributes.append(second_card_attribute)
+                third_card_attributes.append(third_card_attribute)
+        
+        first_card = Card(first_card_attributes[0], first_card_attributes[1], first_card_attributes[2], first_card_attributes[3], self.card_width, self.card_height)
+        second_card = Card(second_card_attributes[0], second_card_attributes[1], second_card_attributes[2], second_card_attributes[3], self.card_width, self.card_height)
+        third_card = Card(third_card_attributes[0], third_card_attributes[1], third_card_attributes[2], third_card_attributes[3], self.card_width, self.card_height)
+
+        return [first_card, second_card, third_card]
 
     def add_card(self):
         color = random.randint(0, 2)
@@ -315,6 +362,9 @@ class GameBoard:
             if not any(new_card.is_equal(card) for card in self.cards) or len(self.cards) == 0:
                 self.cards.append(new_card)
                 sentinelle = False
+
+
+
 
 
 

@@ -23,7 +23,7 @@ mouse_pressed = False
 # Set up the drawing window
 screen = pygame.display.set_mode([SCREEN_SIZE_X, SCREEN_SIZE_Y])
 
-game_state = GameState(SCREEN_SIZE_X, SCREEN_SIZE_Y)
+game_state = GameState(SCREEN_SIZE_X, SCREEN_SIZE_Y, is_train=True, category_to_train="same_same_same_different")
 
 # Run until the user asks to quit
 running = True

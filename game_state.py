@@ -3,9 +3,9 @@ import pygame
 from game_classes import GameBoard
 
 class GameState:
-    def __init__(self, width, height):
+    def __init__(self, width, height, is_train=False, category_to_train=None):
         self.pause = False
-        self.game_board = GameBoard(width, height)
+        self.game_board = GameBoard(width, height, is_train=is_train, category_to_train=category_to_train)
         self.game_board.fill_board()
         self.prev_mouse_state = False
 
