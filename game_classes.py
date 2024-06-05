@@ -50,10 +50,10 @@ class Card:
             pygame.draw.polygon(screen, self.shown_color, s_points)
 
         elif self.shading == 1:
-            pygame.draw.polygon(screen, self.shown_color, s_points, 1)
+            pygame.draw.polygon(screen, self.shown_color, s_points, 3)
 
         else:
-            pygame.draw.polygon(screen, self.shown_color, s_points, 1)
+            pygame.draw.polygon(screen, self.shown_color, s_points, 3)
 
             for i in range(1, 4):
                 pygame.draw.line(screen, self.shown_color, (x + self.width*i/36, y + self.height*(9 - 2*i)/36), (x + self.width*(i - 3)/36, y + self.height*(9 - 2*i)/36))
@@ -165,9 +165,15 @@ class GameBoard:
         self.stats_button_y_offset = 50
         self.stats_button_x = self.card_width
         self.stats_button_y = self.card_height
+        self.train_button_x_offset = 50
+        self.train_button_y_offset = 50
+        self.train_button_x = self.card_width
+        self.train_button_y = self.card_height
 
         self.is_train = is_train
         self.category_to_train = category_to_train
+
+        self.font = pygame.font.Font(None, 36)
 
         self.time = time.time()
 
@@ -202,6 +208,7 @@ class GameBoard:
 
         self.draw_solution_button(screen, cursor_pos)
         self.draw_stats_mode_button(screen, cursor_pos)
+        self.draw_train_button(screen, cursor_pos)
         for i in range(len(self.cards)):
             x = self.base_x + (i%3)*self.x_space
             y = self.base_y + (i//3)*self.y_space
@@ -223,8 +230,6 @@ class GameBoard:
     def draw_stats_mode_button(self, screen, cursor_pos):
         screen_width, screen_height = screen.get_size()
         cursor_x, cursor_y = cursor_pos
-        
-
         pygame.draw.rect(screen, (200, 200, 200), (screen_width - self.stats_button_x_offset - self.stats_button_x, screen_height - self.stats_button_y_offset - self.stats_button_y, self.stats_button_x, self.stats_button_y))
         if self.stats_mode:
             pygame.draw.rect(screen, (0, 255, 0), (screen_width - self.stats_button_x_offset - self.stats_button_x, screen_height - self.stats_button_y_offset - self.stats_button_y, self.stats_button_x, self.stats_button_y), 2)
@@ -236,6 +241,26 @@ class GameBoard:
             pygame.draw.rect(screen, (255, 255, 0), (screen_width - self.stats_button_x_offset - self.stats_button_x, screen_height - self.stats_button_y_offset - self.stats_button_y, self.stats_button_x, self.stats_button_y), 2)
         
         screen.blit(self.stats_mode_image, (screen_width - self.stats_button_x_offset - self.stats_button_x + (self.stats_button_x - self.stats_button_y)//2, screen_height - self.stats_button_y_offset - self.stats_button_y))
+
+    def draw_train_button(self, screen, cursor_pos):
+        screen_width, screen_height = screen.get_size()
+        cursor_x, cursor_y = cursor_pos
+        button_rect = pygame.Rect(((screen_width - self.train_button_x) // 2, screen_height - self.train_button_y_offset - self.train_button_y, self.train_button_x, self.train_button_y))
+        pygame.draw.rect(screen, (200, 200, 200), button_rect)
+        if self.is_train:
+            pygame.draw.rect(screen, (0, 255, 0), ((screen_width - self.train_button_x) // 2, screen_height - self.train_button_y_offset - self.train_button_y, self.train_button_x, self.train_button_y), 2)
+        if (cursor_x >= (screen_width - self.train_button_x) // 2 and
+            cursor_x <= (screen_width + self.train_button_x) // 2 and
+            cursor_y >= screen_height - self.train_button_y_offset - self.train_button_y and
+            cursor_y <= screen_height - self.train_button_y_offset):
+
+            pygame.draw.rect(screen, (255, 255, 0), ((screen_width - self.train_button_x) // 2, screen_height - self.train_button_y_offset - self.train_button_y, self.train_button_x, self.train_button_y), 2)
+        
+        
+        button_text = self.font.render("Train", True, (0, 0, 0))
+        button_text_rect = button_text.get_rect(center=button_rect.center)
+        screen.blit(button_text, button_text_rect)
+
 
 
     def process_click(self, cursor_pos, screen, stats_tracker):
@@ -269,6 +294,13 @@ class GameBoard:
             cursor_y <= screen_height - self.stats_button_y_offset):
 
             self.stats_mode = not self.stats_mode
+
+        if (cursor_x >= (screen_width - self.train_button_x) // 2 and
+            cursor_x <= (screen_width + self.train_button_x) // 2 and
+            cursor_y >= screen_height - self.train_button_y_offset - self.train_button_y and
+            cursor_y <= screen_height - self.train_button_y_offset):
+
+            None
 
 
     def update(self, cursor_pos, screen, is_clicked, stats_tracker):
@@ -313,6 +345,7 @@ class GameBoard:
             self.cards[0], self.cards[indices[0]] = self.cards[indices[0]], self.cards[0]
             self.cards[1], self.cards[indices[1]] = self.cards[indices[1]], self.cards[1]
             self.cards[2], self.cards[indices[2]] = self.cards[indices[2]], self.cards[2]
+            self.solution = [indices[0], indices[1], indices[2]]
 
     
     def generate_set(self, category):
@@ -360,8 +393,22 @@ class GameBoard:
             shading = random.randint(0, 2)
             new_card = Card(color, shape, number, shading, self.card_width, self.card_height)
             if not any(new_card.is_equal(card) for card in self.cards) or len(self.cards) == 0:
-                self.cards.append(new_card)
-                sentinelle = False
+                if not self.is_train:
+                    self.cards.append(new_card)
+                    sentinelle = False
+                elif not self.check_create_solution(new_card):
+                    self.cards.append(new_card)
+                    sentinelle = False
+
+    def check_create_solution(self, card):
+        "Check if adding the card would add another solution"
+        for i in range(len(self.cards)):
+            for j in range(i + 1, len(self.cards)):
+                if self.check_if_solution(card, self.cards[i], self.cards[j]):
+                    return True
+                
+        return False
+
 
 
 
