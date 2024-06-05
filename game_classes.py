@@ -50,10 +50,10 @@ class Card:
             pygame.draw.polygon(screen, self.shown_color, s_points)
 
         elif self.shading == 1:
-            pygame.draw.polygon(screen, self.shown_color, s_points, 1)
+            pygame.draw.polygon(screen, self.shown_color, s_points, 2)
 
         else:
-            pygame.draw.polygon(screen, self.shown_color, s_points, 1)
+            pygame.draw.polygon(screen, self.shown_color, s_points, 2)
 
             for i in range(1, 4):
                 pygame.draw.line(screen, self.shown_color, (x + self.width*i/36, y + self.height*(9 - 2*i)/36), (x + self.width*(i - 3)/36, y + self.height*(9 - 2*i)/36))
@@ -85,10 +85,10 @@ class Card:
             pygame.draw.polygon(screen, self.shown_color, diamond_points)
 
         elif self.shading == 1:
-            pygame.draw.polygon(screen, self.shown_color, diamond_points, 1)
+            pygame.draw.polygon(screen, self.shown_color, diamond_points, 2)
 
         else:
-            pygame.draw.polygon(screen, self.shown_color, diamond_points, 1)
+            pygame.draw.polygon(screen, self.shown_color, diamond_points, 2)
         
             for i in range(1, 5):
                 pygame.draw.line(screen, self.shown_color, (x + self.width/12 - self.width*i/48, y + self.height*i/16), (x - self.width/12 + self.width*i/48, y + self.height*i/16))
@@ -118,10 +118,10 @@ class Card:
             pygame.draw.circle(screen, self.shown_color, (x, y), radius)
         
         elif self.shading == 1:
-            pygame.draw.circle(screen, self.shown_color, (x, y), radius, 1)
+            pygame.draw.circle(screen, self.shown_color, (x, y), radius, 2)
         
         else:
-            pygame.draw.circle(screen, self.shown_color, (x, y), radius, 1)
+            pygame.draw.circle(screen, self.shown_color, (x, y), radius, 2)
             for i in range(11):
                 pi = math.pi
                 pygame.draw.line(screen, self.shown_color, (x + radius*math.cos((5 - i)*pi/10), y + radius*math.sin((5-i)*pi/10)), (x - radius*math.cos((5 - i)*pi/10), y + radius*math.sin((5 - i)*pi/10)))
